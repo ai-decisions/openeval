@@ -1,0 +1,23 @@
+-- First-seen per address over a Tron substrate (Athena/Trino SQL).
+-- Rendered by scripts/athena_first_seen.py: the ADDRESS_VALUES placeholder
+-- (inside the VALUES block below) receives the validated address list,
+-- one quoted row per address (0x-hex canonical form, mainnet prefix stripped); the
+-- DATABASE placeholder receives your database name. Expected tables
+-- (from/to address + block_timestamp):
+--   tron_transactions_normalized, tron_trc20_transfers
+WITH a AS (
+  SELECT address FROM (VALUES
+{{ADDRESS_VALUES}}
+  ) AS t(address)
+)
+SELECT u.addr AS address,
+       CAST(min(u.ts) AS varchar) AS first_seen,
+       count(*) AS n_activity
+FROM (
+  SELECT from_address AS addr, block_timestamp AS ts FROM {{DATABASE}}.tron_transactions_normalized
+  UNION ALL SELECT to_address AS addr, block_timestamp AS ts FROM {{DATABASE}}.tron_transactions_normalized
+  UNION ALL SELECT from_address AS addr, block_timestamp AS ts FROM {{DATABASE}}.tron_trc20_transfers
+  UNION ALL SELECT to_address AS addr, block_timestamp AS ts FROM {{DATABASE}}.tron_trc20_transfers
+) u
+JOIN a ON u.addr = a.address
+GROUP BY u.addr

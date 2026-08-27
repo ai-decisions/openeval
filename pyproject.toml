@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openeval"
+version = "0.1.0"
+description = "Evaluation harness for a graph-based financial-crime detector: a static lead-time replay against an external event registry, a publication-date audit patcher, an event-level lift with an honest per-event null model, an invariance gate for corrected replays, a LaTeX audit-table emitter, and first-seen warehouse runners (Athena SQL templates and BigQuery public datasets)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "AI DECISIONS", email = "opensource@aidecisions.ai" }]
+keywords = [
+    "evaluation",
+    "financial-crime",
+    "aml",
+    "anti-money-laundering",
+    "blockchain",
+    "lead-time",
+    "replay",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# The core package is deliberately stdlib-only: every replay/lift/audit
+# module runs on committed JSON artefacts with no third-party imports.
+# The warehouse runners import their SDKs lazily and live behind extras,
+# so `pip install openeval && pytest` needs no cloud SDK at all.
+dependencies = []
+
+[project.optional-dependencies]
+# scripts/athena_first_seen.py — runs the shipped SQL templates on your
+# Athena installation. Lazy import with a precise message when missing.
+athena = ["boto3>=1.34"]
+# scripts/bq_first_seen.py — first-seen over BigQuery PUBLIC datasets
+# (bigquery-public-data); the one path a third party can run without any
+# private warehouse. Lazy import with a precise message when missing.
+bq = ["google-cloud-bigquery>=3.20"]
+# Everything the test suite touches, so `pip install -e .[dev]` is enough
+# to run `pytest` green — no test is silently skipped for a missing
+# dependency (the warehouse runners are tested through injected fakes).
+dev = [
+    "pytest>=8",
+    "ruff>=0.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/ai-decisions/openeval"
+Issues = "https://github.com/ai-decisions/openeval/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

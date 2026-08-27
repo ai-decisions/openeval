@@ -1,0 +1,11 @@
+# Tool caches and build artefacts. The sanitize gate deliberately skips VCS
+# and tool caches, so nothing here may ever be shipped by any other channel:
+# publication is by `git archive` of tracked content only.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+build/
+dist/
+*.egg-info/

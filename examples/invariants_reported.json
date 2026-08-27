@@ -1,0 +1,5 @@
+{
+ "ethereum": {"n_events": 42, "n_detected": 23, "null_event_rate_in_graph_m": 0.003944},
+ "tron": {"n_events": 26, "n_detected": 17, "null_event_rate_in_graph_m": 0.003762},
+ "evm_total": {"n_events": 68, "n_detected": 40, "null_event_rate_in_graph_m": 0.003874}
+}

@@ -1,0 +1,33 @@
+openeval
+Copyright 2026 AI DECISIONS (aidecisions.ai)
+
+This product includes software developed at AI DECISIONS
+(https://aidecisions.ai/).
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this software except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+---
+
+Data-source notes:
+
+- scripts/bq_first_seen.py queries Google BigQuery PUBLIC datasets
+  (`bigquery-public-data.crypto_ethereum` and
+  `bigquery-public-data.goog_blockchain_tron_mainnet_us`) at run time,
+  under the user's own Google Cloud project and billing. No data from
+  those datasets ships in this repository; use is subject to the
+  datasets' own terms.
+- scripts/athena_first_seen.py renders the shipped SQL templates against
+  a warehouse the USER configures (database, workgroup and region are
+  required parameters with no defaults). No warehouse data ships here.
+
+This repository ships NO datasets: no event registry, no address lists,
+no detector scores, no first-seen indices, no model weights and no
+threshold values (see README "Boundary"). Every input is a parameter the
+user supplies; warehouse configuration is fail-closed.
+
+Outputs derived from CC-BY-NC sources (e.g. OpenSanctions) or BSL-licensed
+sources (e.g. Dune Spellbook) must not be added to this repository.

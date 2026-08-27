@@ -1,0 +1,24 @@
+-- First-seen per address over an Ethereum-style substrate (Athena/Trino SQL).
+-- Rendered by scripts/athena_first_seen.py: the ADDRESS_VALUES placeholder
+-- (inside the VALUES block below) receives the validated address list,
+-- one quoted row per address; the DATABASE placeholder receives your database name.
+-- Expected tables (from/to address + block_timestamp):
+--   eth_transactions, eth_traces, eth_token_transfers
+WITH a AS (
+  SELECT address FROM (VALUES
+{{ADDRESS_VALUES}}
+  ) AS t(address)
+)
+SELECT u.addr AS address,
+       CAST(min(u.ts) AS varchar) AS first_seen,
+       count(*) AS n_activity
+FROM (
+  SELECT from_address AS addr, block_timestamp AS ts FROM {{DATABASE}}.eth_transactions
+  UNION ALL SELECT to_address AS addr, block_timestamp AS ts FROM {{DATABASE}}.eth_transactions
+  UNION ALL SELECT from_address AS addr, block_timestamp AS ts FROM {{DATABASE}}.eth_traces
+  UNION ALL SELECT to_address AS addr, block_timestamp AS ts FROM {{DATABASE}}.eth_traces
+  UNION ALL SELECT from_address AS addr, block_timestamp AS ts FROM {{DATABASE}}.eth_token_transfers
+  UNION ALL SELECT to_address AS addr, block_timestamp AS ts FROM {{DATABASE}}.eth_token_transfers
+) u
+JOIN a ON u.addr = a.address
+GROUP BY u.addr

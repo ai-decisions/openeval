@@ -1,0 +1,26 @@
+-- First-seen per address over a Bitcoin substrate (Athena/Trino SQL).
+-- Rendered by scripts/athena_first_seen.py: the ADDRESS_VALUES placeholder
+-- (inside the VALUES block below) receives the validated address list,
+-- one quoted row per address; the DATABASE placeholder receives your database name.
+-- Expected tables (addresses ARRAY + block_timestamp):
+--   btc_outputs_normalized, btc_patch_outputs_normalized
+-- (the second table holds late-arriving output corrections; point both at
+-- the same table if your substrate has no patch stream)
+WITH a AS (
+  SELECT address FROM (VALUES
+{{ADDRESS_VALUES}}
+  ) AS t(address)
+)
+SELECT x.addr AS address,
+       min(x.ts) AS first_seen,
+       count(*) AS n_activity
+FROM (
+  SELECT u.addr AS addr, o.block_timestamp AS ts
+  FROM (
+  SELECT addresses, block_timestamp FROM {{DATABASE}}.btc_outputs_normalized
+  UNION ALL SELECT addresses, block_timestamp FROM {{DATABASE}}.btc_patch_outputs_normalized
+  ) o
+  CROSS JOIN UNNEST(o.addresses) AS u(addr)
+) x
+JOIN a ON x.addr = a.address
+GROUP BY x.addr
